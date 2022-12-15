@@ -1,15 +1,11 @@
 package scanner
 
-type Scanner interface {
-	ScanTokens() []string
+func New(source string) *Scanner {
+	return &Scanner{}
 }
 
-func New(source string) Scanner {
-	return &_Scanner{}
-}
+type Scanner struct{}
 
-type _Scanner struct{}
-
-func (s _Scanner) ScanTokens() []string {
+func (s Scanner) ScanTokens() []string {
 	return make([]string, 0)
 }
