@@ -103,6 +103,8 @@ func (s *Scanner) scanToken() error {
 	case '\t':
 	case '\n':
 		s.line += 1
+	case '"':
+		s.parseString()
 
 	default:
 		return fmt.Errorf("unexpected character: %v", string(runeValue))
@@ -154,4 +156,26 @@ func (s *Scanner) peek() rune {
 
 	value, _ := utf8.DecodeRuneInString(s.source[s.current:])
 	return value
+}
+
+func (s *Scanner) parseString() error {
+	for !s.isAtEnd() && s.peek() != '"' {
+		if s.peek() == '\n' {
+			s.line += 1
+		}
+
+		s.advance()
+	}
+
+	if s.isAtEnd() {
+		return fmt.Errorf("unterminated string")
+	}
+
+	// the closing "
+	s.advance()
+
+	// Trim the surrounding quotes
+	value := s.source[s.start+1 : s.current-1]
+	s.addTokenLiteral(token.STRING, value)
+	return nil
 }
