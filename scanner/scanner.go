@@ -2,10 +2,30 @@ package scanner
 
 import (
 	"fmt"
+	"strconv"
 	"unicode/utf8"
 
 	"github.com/royvandewater/glox/token"
 )
+
+var keywords = map[string]string{
+	"and":    token.AND,
+	"class":  token.CLASS,
+	"else":   token.ELSE,
+	"false":  token.FALSE,
+	"for":    token.FOR,
+	"fun":    token.FUN,
+	"if":     token.IF,
+	"nil":    token.NIL,
+	"or":     token.OR,
+	"print":  token.PRINT,
+	"return": token.RETURN,
+	"super":  token.SUPER,
+	"this":   token.THIS,
+	"true":   token.TRUE,
+	"var":    token.VAR,
+	"while":  token.WHILE,
+}
 
 func New(source string) *Scanner {
 	return &Scanner{
@@ -107,6 +127,13 @@ func (s *Scanner) scanToken() error {
 		s.parseString()
 
 	default:
+		if s.isDigit(runeValue) {
+			return s.parseNumber()
+		}
+		if s.isAlpha(runeValue) {
+			s.parseIdentifier()
+			return nil
+		}
 		return fmt.Errorf("unexpected character: %v", string(runeValue))
 	}
 
@@ -129,8 +156,32 @@ func (s *Scanner) advance() rune {
 	return value
 }
 
+func (s *Scanner) isAlpha(c rune) bool {
+	if 'a' <= c && c <= 'z' {
+		return true
+	}
+
+	if 'A' <= c && c <= 'Z' {
+		return true
+	}
+
+	if c == '_' {
+		return true
+	}
+
+	return false
+}
+
+func (s *Scanner) isAlphaNumeric(c rune) bool {
+	return s.isAlpha(c) || s.isDigit(c)
+}
+
 func (s *Scanner) isAtEnd() bool {
 	return s.current >= len(s.source)
+}
+
+func (s *Scanner) isDigit(c rune) bool {
+	return '0' <= c && c <= '9'
 }
 
 func (s *Scanner) match(expected rune) bool {
@@ -149,13 +200,45 @@ func (s *Scanner) match(expected rune) bool {
 	return true
 }
 
-func (s *Scanner) peek() rune {
-	if s.isAtEnd() {
-		return '\x00'
+func (s *Scanner) parseIdentifier() {
+	for s.isAlphaNumeric(s.peek()) {
+		s.advance()
 	}
 
-	value, _ := utf8.DecodeRuneInString(s.source[s.current:])
-	return value
+	text := s.source[s.start:s.current]
+
+	token_type := keywords[text]
+
+	if token_type == "" {
+		s.addToken(token.IDENTIFIER)
+		return
+	}
+
+	s.addToken(token_type)
+}
+
+func (s *Scanner) parseNumber() error {
+	for !s.isAtEnd() && s.isDigit(s.peek()) {
+		s.advance()
+	}
+
+	if s.peek() == '.' && s.isDigit(s.peekNext()) {
+		// consume the '.'
+		s.advance()
+
+		for s.isDigit(s.peek()) {
+			s.advance()
+		}
+
+	}
+
+	value, err := strconv.ParseFloat(s.source[s.start:s.current], 64)
+	if err != nil {
+		return err
+	}
+
+	s.addTokenLiteral(token.NUMBER, value)
+	return nil
 }
 
 func (s *Scanner) parseString() error {
@@ -178,4 +261,23 @@ func (s *Scanner) parseString() error {
 	value := s.source[s.start+1 : s.current-1]
 	s.addTokenLiteral(token.STRING, value)
 	return nil
+}
+
+func (s *Scanner) peek() rune {
+	if s.isAtEnd() {
+		return '\x00'
+	}
+
+	value, _ := utf8.DecodeRuneInString(s.source[s.current:])
+	return value
+}
+
+func (s *Scanner) peekNext() rune {
+	if s.current+1 > len(s.source) {
+		return '\x00'
+	}
+
+	index := s.current + 1
+	value, _ := utf8.DecodeRuneInString(s.source[index:])
+	return value
 }
