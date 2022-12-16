@@ -87,31 +87,36 @@ func (s *Scanner) scanToken() error {
 	case '*':
 		s.addToken(token.STAR)
 	case '!':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.addToken(token.BANG_EQUAL)
 		} else {
 			s.addToken(token.BANG)
 		}
 	case '=':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.addToken(token.EQUAL_EQUAL)
 		} else {
 			s.addToken(token.EQUAL)
 		}
 	case '<':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.addToken(token.LESS_EQUAL)
 		} else {
 			s.addToken(token.LESS)
 		}
 	case '>':
-		if s.match('=') {
+		if s.peek() == '=' {
+			s.advance()
 			s.addToken(token.GREATER_EQUAL)
 		} else {
 			s.addToken(token.GREATER)
 		}
 	case '/':
-		if s.match('/') {
+		if s.peek() == '/' {
+			s.advance()
 			for !s.isAtEnd() && s.peek() != '\n' {
 				s.advance()
 			}
@@ -182,22 +187,6 @@ func (s *Scanner) isAtEnd() bool {
 
 func (s *Scanner) isDigit(c rune) bool {
 	return '0' <= c && c <= '9'
-}
-
-func (s *Scanner) match(expected rune) bool {
-	if s.isAtEnd() {
-		return false
-	}
-
-	index := s.current + 1
-	value, _ := utf8.DecodeRuneInString(s.source[index:])
-
-	if value != expected {
-		return false
-	}
-
-	s.advance()
-	return true
 }
 
 func (s *Scanner) parseIdentifier() {
