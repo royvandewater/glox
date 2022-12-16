@@ -61,7 +61,7 @@ func run(source string) error {
 	scanner := scanner.New(source)
 	tokens := scanner.ScanTokens()
 
-	for token := range tokens {
+	for _, token := range tokens {
 		fmt.Println(token)
 	}
 	return nil
