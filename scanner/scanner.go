@@ -90,6 +90,19 @@ func (s *Scanner) scanToken() error {
 		} else {
 			s.addToken(token.GREATER)
 		}
+	case '/':
+		if s.match('/') {
+			for !s.isAtEnd() && s.peek() != '\n' {
+				s.advance()
+			}
+		} else {
+			s.addToken(token.SLASH)
+		}
+	case ' ': // Go case statements **DO NOT** fall through
+	case '\r':
+	case '\t':
+	case '\n':
+		s.line += 1
 
 	default:
 		return fmt.Errorf("unexpected character: %v", string(runeValue))
@@ -132,4 +145,13 @@ func (s *Scanner) match(expected rune) bool {
 
 	s.advance()
 	return true
+}
+
+func (s *Scanner) peek() rune {
+	if s.isAtEnd() {
+		return '\x00'
+	}
+
+	value, _ := utf8.DecodeRuneInString(s.source[s.current:])
+	return value
 }
