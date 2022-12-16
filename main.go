@@ -16,9 +16,12 @@ func main() {
 	}
 
 	if len(os.Args) == 2 {
-		err := runFile(os.Args[1])
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error running file: ", err.Error())
+		errs := runFile(os.Args[1])
+		if len(errs) > 0 {
+			fmt.Fprintln(os.Stderr, "Error running file: ")
+			for _, err := range errs {
+				fmt.Fprintln(os.Stderr, err.Error())
+			}
 			os.Exit(1)
 		}
 		os.Exit(0)
@@ -28,10 +31,10 @@ func main() {
 	os.Exit(0)
 }
 
-func runFile(filename string) error {
+func runFile(filename string) []error {
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
-		return err
+		return []error{err}
 	}
 
 	return run(string(bytes))
@@ -50,16 +53,20 @@ func runPrompt() error {
 			return err
 		}
 
-		err = run(line)
-		if err != nil {
+		errs := run(line)
+		for _, err := range errs {
 			fmt.Fprintln(os.Stderr, "Error running line: ", err.Error())
 		}
 	}
 }
 
-func run(source string) error {
+func run(source string) []error {
 	scanner := scanner.New(source)
-	tokens := scanner.ScanTokens()
+	tokens, errs := scanner.ScanTokens()
+
+	if len(errs) > 0 {
+		return errs
+	}
 
 	for _, token := range tokens {
 		fmt.Println(token)
