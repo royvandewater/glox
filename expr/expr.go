@@ -14,6 +14,13 @@ type Expr interface {
 	Accept()
 }
 
+type Visitor interface {
+	VisitBinaryExpr(expr Binary)
+	VisitGroupingExpr(expr Grouping)
+	VisitLiteralExpr(expr Literal)
+	VisitUnaryExpr(expr Unary)
+}
+
 type Binary struct {
 	Left     Expr
 	Operator Token
