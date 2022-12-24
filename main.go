@@ -9,6 +9,9 @@ import (
 	"github.com/royvandewater/glox/scanner"
 )
 
+// command to regenerate ast
+//go:generate sh -c "go run generateast/generateast.go expr/ && go fmt ./expr/ > /dev/null"
+
 func main() {
 	if len(os.Args) > 2 {
 		fmt.Fprintln(os.Stderr, " usage: glox [script]")
