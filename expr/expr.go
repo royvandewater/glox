@@ -11,14 +11,14 @@ import (
 type Token = token.Token
 
 type Expr interface {
-	Accept()
+	Accept(visitor Visitor)
 }
 
 type Visitor interface {
-	VisitBinaryExpr(expr Binary)
-	VisitGroupingExpr(expr Grouping)
-	VisitLiteralExpr(expr Literal)
-	VisitUnaryExpr(expr Unary)
+	VisitBinaryExpr(expr *Binary)
+	VisitGroupingExpr(expr *Grouping)
+	VisitLiteralExpr(expr *Literal)
+	VisitUnaryExpr(expr *Unary)
 }
 
 type Binary struct {

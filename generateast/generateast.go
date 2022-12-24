@@ -55,7 +55,7 @@ import (
 type Token = token.Token
 
 type Expr interface {
-	Accept()
+	Accept(visitor Visitor)
 }
 
 type Visitor interface {
@@ -64,7 +64,7 @@ type Visitor interface {
 	for _, rule := range rules {
 		className, _, _ := strings.Cut(rule, ":")
 		className = strings.TrimSpace(className)
-		fmt.Fprintf(&data, "  Visit%v%v(%v %v)\n", titleCaser.String(className), titleCaser.String(baseName), strings.ToLower(baseName), titleCaser.String(className))
+		fmt.Fprintf(&data, "  Visit%v%v(%v *%v)\n", titleCaser.String(className), titleCaser.String(baseName), strings.ToLower(baseName), titleCaser.String(className))
 	}
 	fmt.Fprintln(&data, "}")
 	fmt.Fprintln(&data)
