@@ -35,6 +35,10 @@ func NewBinary(left Expr, operator Token, right Expr) *Binary {
 	}
 }
 
+func (e *Binary) Accept(visitor Visitor) {
+	visitor.VisitBinaryExpr(e)
+}
+
 type Grouping struct {
 	Expression Expr
 }
@@ -43,6 +47,10 @@ func NewGrouping(expression Expr) *Grouping {
 	return &Grouping{
 		Expression: expression,
 	}
+}
+
+func (e *Grouping) Accept(visitor Visitor) {
+	visitor.VisitGroupingExpr(e)
 }
 
 type Literal struct {
@@ -55,6 +63,10 @@ func NewLiteral(value any) *Literal {
 	}
 }
 
+func (e *Literal) Accept(visitor Visitor) {
+	visitor.VisitLiteralExpr(e)
+}
+
 type Unary struct {
 	Operator Token
 	Right    Expr
@@ -65,4 +77,8 @@ func NewUnary(operator Token, right Expr) *Unary {
 		Operator: operator,
 		Right:    right,
 	}
+}
+
+func (e *Unary) Accept(visitor Visitor) {
+	visitor.VisitUnaryExpr(e)
 }

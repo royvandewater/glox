@@ -105,6 +105,13 @@ func New%v(%v) *%v {
 	fmt.Fprintln(&data, "  }")
 	fmt.Fprintln(&data, "}")
 
+	// Visitor pattern
+	fmt.Fprintf(&data, `
+func (e *%v) Accept(visitor Visitor) {
+	visitor.Visit%s%s(e)
+}
+`, className, titleCaser.String(className), titleCaser.String(baseName))
+
 	return data.String()
 }
 
