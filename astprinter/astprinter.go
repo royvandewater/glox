@@ -11,6 +11,10 @@ type AstPrinter struct {
 	ReturnValue string
 }
 
+func New() *AstPrinter {
+	return &AstPrinter{}
+}
+
 func (a *AstPrinter) Print(expr expr.Expr) string {
 	expr.Accept(a)
 	return a.ReturnValue

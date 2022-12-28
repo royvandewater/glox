@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/royvandewater/glox/astprinter"
+	"github.com/royvandewater/glox/parser"
 	"github.com/royvandewater/glox/scanner"
 )
 
@@ -71,8 +73,13 @@ func run(source string) []error {
 		return errs
 	}
 
-	for _, token := range tokens {
-		fmt.Println(token)
+	parser := parser.New(tokens)
+	expr, err := parser.Parse()
+
+	if err != nil {
+		return []error{err}
 	}
+
+	fmt.Println(astprinter.New().Print(expr))
 	return nil
 }
